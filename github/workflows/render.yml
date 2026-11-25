@@ -1,0 +1,40 @@
+name: Build & Render Short
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - 'src/Scene.tsx'
+
+jobs:
+  render:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install Python & Edge-TTS
+        run: pip install edge-tts
+
+      - name: Generate Voiceover
+        run: |
+          mkdir -p public
+          python generate_voice.py
+
+      - name: Install Video Dependencies
+        run: npm install
+
+      - name: Render 720p Vertical Short
+        run: npx remotion render src/index.ts MainVideo out/short.mp4 --gl=swangle --scale=0.6666666666666666
+
+      - name: Upload Finished Video
+        uses: actions/upload-artifact@v4
+        with:
+          name: BloxOmen-Short
+          path: out/short.mp4
+          
